@@ -1,0 +1,27 @@
+{
+  "name": "kraskal-algorithm",
+  "version": "1.0.0",
+  "description": "My solution Kraskal algorithm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kovarniy/Kraskal-Algorithm.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kovarniy/Kraskal-Algorithm/issues"
+  },
+  "homepage": "https://github.com/Kovarniy/Kraskal-Algorithm#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
+}
