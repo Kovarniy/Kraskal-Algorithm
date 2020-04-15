@@ -1,7 +1,6 @@
 "use strict";
-let matrixBoard;
+// let matrixBoard;
 let currentSize = 2;
-let adjMatrix = [];
 
 class Edge {
   constructor(weight, vertexA, vertexB) {
@@ -65,10 +64,8 @@ class AdjComponents {
   }
 }
 
-let edges, adjComp;
-
 window.onload = function () {
-  matrixBoard = document.getElementById("matrixBoard");
+  // matrixBoard = document.getElementById("matrixBoard");
   const startInput = document.querySelectorAll("#matrixBoard > input");
   startInput[1].onchange = autoComlitMatrix;
   startInput[2].onchange = autoComlitMatrix;
@@ -100,6 +97,7 @@ const renderMatrix = (matrixSize) => {
         newMatrixInput.onchange = autoComlitMatrix;
         newMatrixInput.setAttribute("pattern", "[0-9]{1,3}");
       }
+      // TODO: создать сунд мактрикс как жлемент
       sendMatrix.before(newMatrixInput);
     }
     const newBr = document.createElement("br");
@@ -116,13 +114,23 @@ function autoComlitMatrix() {
   elem.value = cellValue;
 }
 
-const parsingMatrix = () => {
-  let count = 0;
+const createAdjacencyMatrix = () => {
+  let newMatrix = [];
   for (let i = 0; i < currentSize; i++) {
-    adjMatrix[i] = [];
+    newMatrix[i] = [];
     for (let j = 0; j < currentSize; j++) {
       const elem = document.querySelector(`input[x="${i + 1}"][y="${j + 1}"]`);
-      adjMatrix[i][j] = elem.value;
+      newMatrix[i][j] = elem.value;
+    }
+  }
+  return newMatrix;
+};
+
+const createEdgesList = (adjMatrix) => {
+  let edgesList;
+  let count = 0;
+  for (let i = 0; i < currentSize; i++) {
+    for (let j = 0; j < currentSize; j++) {
       if (adjMatrix[i][j] != 0 && j > i) {
         let obj = {
           weight: adjMatrix[i][j],
@@ -132,22 +140,25 @@ const parsingMatrix = () => {
 
         if (count === 0) {
           count++;
-          edges = new Edge(adjMatrix[i][j], i, j);
-        } else edges.pushEdge(obj);
+          edgesList = new Edge(adjMatrix[i][j], i, j);
+        } else edgesList.pushEdge(obj);
       }
     }
   }
-
-  return false;
+  return edgesList;
 };
 
 const compliteTask = () => {
-  parsingMatrix();
-  edges.sortByWeight();
-  console.log(edges);
+  let adjComp;
+  const adjMatrix = createAdjacencyMatrix();
+  console.log(adjMatrix);
+  const edgesList = createEdgesList(adjMatrix);
+  console.log(edgesList);
+  edgesList.sortByWeight();
+  // Инициализируем компоненты связанности
   adjComp = new AdjComponents(currentSize);
-  console.log(adjComp);
-  adjComp.merge(0, 1);
+
+  //adjComp.merge(0, 1);
 
   return false;
 };
