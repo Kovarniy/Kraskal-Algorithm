@@ -36,7 +36,7 @@ class AdjComponents {
     for (let i = 0; i < count; i++) {
       this.comp.push({
         name: i,
-        vertices: i,
+        vertices: [i],
       });
     }
   }
@@ -50,21 +50,18 @@ class AdjComponents {
   }
 
   merge(comp1, comp2) {
+    let ind1 = this.comp.findIndex((compounent) => compounent.name === comp1);
+    let ind2 = this.comp.findIndex((compounent) => compounent.name === comp2);
     // TODO: проверка на существование компонент
-    console.log(this.comp);
-    // if (this.comp.name.includes(comp1) && this.comp.name.includes(comp2)) {
-    //   // let index1 = this.comp.name.indexOf(comp1);
-    //   // let index2 = this.comp.name.indexOf(comp2);
-    //   console.log(index1);
-    //   console.log(index2);
-    // }
-  }
-
-  findBy(field, value) {
-    for (let i = 0; i < this.comp.length; i++) {
-      if (this.comp[field] === value) return 1;
+    if (ind1 != -1 && ind2 != -1) {
+      // Копируем вершины из одной компоненты в другую "объеденяем компоненты"
+      this.comp[ind2].vertices.forEach((vertices) =>
+        this.comp[ind1].vertices.push(vertices)
+      );
+      // удалем доабавлемую компоненту
+      this.comp.splice(ind2, 1);
+      console.log(adjComp);
     }
-    return -1;
   }
 }
 
