@@ -59,28 +59,38 @@ class AdjComponents {
       );
       // удалем доабавлемую компоненту
       this.comp.splice(ind2, 1);
-      console.log(adjComp);
+    }
+  }
+
+  getCompNameByVertex(vertexNum) {
+    const compLen = this.comp.length;
+    for (let i = 0; i < compLen; i++) {
+      const _num = this.comp[i].vertices.indexOf(vertexNum);
+      if (_num !== -1) return this.comp[i].name;
+      else if (i === compLen - 1) return -1;
     }
   }
 }
 
 window.onload = function () {
   // matrixBoard = document.getElementById("matrixBoard");
-  const startInput = document.querySelectorAll("#matrixBoard > input");
+  const startInput = document.querySelectorAll("#inputMatrixField > input");
   startInput[1].onchange = autoComlitMatrix;
   startInput[2].onchange = autoComlitMatrix;
 };
 
-const removeOldMatrix = () => {
-  const $matrixInputFields = document.querySelectorAll("#matrixBoard > input");
+/// DOM manipulation
+const removeOldMatrix = (slector) => {
+  const $matrixInputFields = document.querySelectorAll(`${slector} > input`);
   for (let i = 0; i < $matrixInputFields.length; i++)
     $matrixInputFields[i].remove();
-  const $matrixBr = document.querySelectorAll("#matrixBoard > br");
+  const $matrixBr = document.querySelectorAll(`${slector} > br`);
   for (let i = 0; i < $matrixBr.length; i++) $matrixBr[i].remove();
 };
 
-const renderMatrix = (matrixSize) => {
-  removeOldMatrix();
+// TODO: объеденить методы рендера матриц (Можно рассмотреть этот вопрос с точки насследования)
+const renderInputMatrix = (matrixSize, workingFieldSelector) => {
+  const workingField = document.querySelector(`${workingFieldSelector}`);
 
   for (let i = 0; i < matrixSize; i++) {
     for (let j = 0; j < matrixSize; j++) {
@@ -97,13 +107,46 @@ const renderMatrix = (matrixSize) => {
         newMatrixInput.onchange = autoComlitMatrix;
         newMatrixInput.setAttribute("pattern", "[0-9]{1,3}");
       }
-      // TODO: создать сунд мактрикс как жлемент
-      sendMatrix.before(newMatrixInput);
+      workingField.before(newMatrixInput);
     }
     const newBr = document.createElement("br");
     sendMatrix.before(newBr);
     currentSize = matrixSize;
   }
+};
+
+const renderOutputMatrix = (workingFieldSelector, solution) => {
+  const workingField = document.querySelector(`${workingFieldSelector}`);
+
+  const h2 = document.createElement("h2");
+  h2.innerText = "Остовная матрица";
+  workingField.append(h2);
+
+  for (let i = 0; i < currentSize; i++) {
+    for (let j = 0; j < currentSize; j++) {
+      const newMatrixInput = document.createElement("input");
+      newMatrixInput.setAttribute("value", solution.coreMatrix[i][j]);
+      newMatrixInput.setAttribute("size", "5");
+      newMatrixInput.setAttribute("disabled", "disabled");
+      workingField.append(newMatrixInput);
+    }
+    const newBr = document.createElement("br");
+    workingField.append(newBr);
+  }
+
+  let p = document.createElement("p");
+  p.innerText = `Стоимость оптимального пути: ${solution.optimalPrice}`;
+  workingField.append(p);
+};
+
+const changeInputMatrix = (matrixSize) => {
+  removeOldMatrix("#inputMatrixField");
+  const parent = document.getElementById("outputMatrixField");
+  while (parent.firstChild) {
+    parent.firstChild.remove();
+  }
+
+  renderInputMatrix(matrixSize, "#sendMatrix");
 };
 
 function autoComlitMatrix() {
@@ -113,7 +156,9 @@ function autoComlitMatrix() {
   const elem = document.querySelector(`input[x="${y}"][y="${x}"]`);
   elem.value = cellValue;
 }
+//
 
+// Functions of creation and prind data
 const createAdjacencyMatrix = () => {
   let newMatrix = [];
   for (let i = 0; i < currentSize; i++) {
@@ -133,14 +178,14 @@ const createEdgesList = (adjMatrix) => {
     for (let j = 0; j < currentSize; j++) {
       if (adjMatrix[i][j] != 0 && j > i) {
         let obj = {
-          weight: adjMatrix[i][j],
+          weight: parseInt(adjMatrix[i][j]),
           vertexA: i,
           vertexB: j,
         };
 
         if (count === 0) {
           count++;
-          edgesList = new Edge(adjMatrix[i][j], i, j);
+          edgesList = new Edge(parseInt(adjMatrix[i][j]), i, j);
         } else edgesList.pushEdge(obj);
       }
     }
@@ -148,17 +193,69 @@ const createEdgesList = (adjMatrix) => {
   return edgesList;
 };
 
+let printSolution = (solution) => {
+  const parent = document.getElementById("outputMatrixField");
+  while (parent.firstChild) {
+    parent.firstChild.remove();
+  }
+
+  renderOutputMatrix("#outputMatrixField", solution);
+};
+//
+
+// Algorithmic Functions
+const algOfKrascal = (adjComp, edgesList) => {
+  const edgesLen = edgesList.edge.length;
+  let optimalPrice = 0;
+
+  // инициализация шаблона остовной матрицы
+  let coreMatrix = [];
+  for (let i = 0; i < currentSize; i++) {
+    coreMatrix[i] = [];
+    for (let j = 0; j < currentSize; j++) coreMatrix[i][j] = 0;
+  }
+
+  for (let i = 0; i < edgesLen; i++) {
+    const vertexA = edgesList.edge[i].vertexA;
+    const vertexB = edgesList.edge[i].vertexB;
+    const nameFirstComp = adjComp.getCompNameByVertex(vertexA);
+    const nameSecondComp = adjComp.getCompNameByVertex(vertexB);
+
+    if (nameFirstComp != nameSecondComp) {
+      console.log(vertexA);
+      console.log(vertexB);
+
+      adjComp.merge(nameFirstComp, nameSecondComp);
+      const currentWeight = edgesList.edge[i].weight;
+      optimalPrice += currentWeight;
+      coreMatrix[vertexA][vertexB] = currentWeight;
+      coreMatrix[vertexB][vertexA] = currentWeight;
+    }
+  }
+
+  const solution = {
+    optimalPrice: optimalPrice,
+    coreMatrix: coreMatrix,
+  };
+
+  return solution;
+};
+//
+
+// Function of start aka start point
 const compliteTask = () => {
-  let adjComp;
   const adjMatrix = createAdjacencyMatrix();
-  console.log(adjMatrix);
+  // console.log(adjMatrix);
   const edgesList = createEdgesList(adjMatrix);
-  console.log(edgesList);
+  // console.log(edgesList);
   edgesList.sortByWeight();
   // Инициализируем компоненты связанности
-  adjComp = new AdjComponents(currentSize);
+  let adjComp = new AdjComponents(currentSize);
+  // console.log(adjComp);
+  let solution = algOfKrascal(adjComp, edgesList);
+  console.log(solution);
 
-  //adjComp.merge(0, 1);
+  printSolution(solution);
 
   return false;
 };

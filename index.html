@@ -7,7 +7,15 @@
     <script src="scripts/app.js"></script>
   </head>
   <body>
-    <select name="" id="changeSizeMatrix" onchange="renderMatrix(this.value)">
+    <h1>Алгоритм Краскала</h1>
+
+    <h2>Матрица стоимости ребер</h1>
+
+    <select
+      name=""
+      id="changeSizeMatrix"
+      onchange="changeInputMatrix(this.value)"
+    >
       <option value="2" class="size2">2x2</option>
       <option value="3" class="size3">3x3</option>
       <option value="4" class="size4">4x4</option>
@@ -16,7 +24,7 @@
       <option value="7" class="size7">7x7</option>
     </select>
 
-    <form id="matrixBoard" onsubmit="return compliteTask();">
+    <form id="inputMatrixField" onsubmit="return compliteTask();">
       <input
         class="iputField"
         type="text"
@@ -60,5 +68,9 @@
         Отправить данные
       </button>
     </form>
+
+    <div id="outputMatrixField">
+
+    </div>
   </body>
 </html>
